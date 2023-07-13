@@ -5,10 +5,20 @@ enum StarType{
 }
 
 interface HomestayInfo {
+    id?: string
     name: string
-    stars: number
-    numReviews: number
+    description: string
+    stars?: number
+    numReviews?: number
     address: string
+    price: number
+}
+
+interface HostInfo {
+    hostID: string
+    name: string
+    numGuests: number
+    numRooms: number
 }
 
 interface PricingConfig {
@@ -29,4 +39,22 @@ interface TokenPair{
     refreshToken: string
 }
 
-export {StarType, type HomestayInfo, type PricingConfig, type Review, type TokenPair};
+export interface UserDetail{
+    username: string,
+    firstName: string,
+    lastName: string,
+    phoneNumber?: string,
+    streetName?: string,
+    streetNumber?: string,
+    district?: string,
+    city?: string,
+    avatar?: string,
+    email?: string,
+}
+
+export {StarType, 
+    type HomestayInfo, 
+    type HostInfo,
+    type PricingConfig, 
+    type Review, 
+    type TokenPair};
