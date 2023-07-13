@@ -1,3 +1,5 @@
+<!-- <div class="bg-homestay-bg min-w-full h-auto object-contain"> -->
+
 <script lang="ts">
     import SearchBar from "$lib/components/LandingPage/SearchBar.svelte";
     import Offer from "$lib/components/LandingPage/Offer.svelte";
@@ -9,7 +11,8 @@
 </script>
 
 <div class="relative bg-homestay-bg bg-no-repeat bg-cover bg-opacity-50 min-h-screen min-w-full">
-    <Center className="pt-20">
+    
+    <Center className="pt-20 px-8">
         <SearchBar></SearchBar>
     </Center>
 
