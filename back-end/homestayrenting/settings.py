@@ -48,6 +48,7 @@ INSTALLED_APPS = [
 
     'users.apps.UsersConfig',
     'myadmin.apps.MyAdminConfig',
+    'homestays.apps.HomestaysConfig',
 ]
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
