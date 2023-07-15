@@ -2,7 +2,16 @@ import re, faker
 import csv, json
 import random
 import requests
+import cloudinary
+import cloudinary.uploader
+import cloudinary.api
 from tqdm import tqdm
+
+cloudinary.config( 
+  cloud_name = "dp9km8tmk", 
+  api_key = "649821629756593", 
+  api_secret = "KoF4eTbX-cr9o7_Pc77_W3ro1MQ" 
+)
 
 def login_admin():
     url = 'http://127.0.0.1:8000/api/token/'
@@ -37,6 +46,15 @@ def generate_users(cities, streets, headers, num_customers=80, num_managers=20):
     fake = faker.Faker('vi_VN')
     num_users = num_customers + num_managers
     users = []
+    manager_usernames = []
+
+    # fetch full avatar urls from cloudinary
+    resources = cloudinary.api.resources(type = 'upload', prefix = "homestay-renting-website/user_avatars", max_results=500)
+    urls = []
+    for resource in resources['resources']:
+        url = cloudinary.utils.cloudinary_url(resource['public_id'])
+        urls.append(url[0])
+
     for i in range(num_users):
         # fake a Vietnamese name
         username = fake.user_name()
@@ -44,14 +62,19 @@ def generate_users(cities, streets, headers, num_customers=80, num_managers=20):
         is_superuser = 'false'
         first_name = fake.first_name()
         last_name = fake.last_name()
-        is_staff = 'false' if i < num_customers else 'true'
+        if i < num_managers:
+            is_staff = 'true'
+            manager_usernames.append(username)
+        else:
+            is_staff = 'false'
         is_active = 'true'
         phone_number = fake.phone_number().replace('-', '').replace('x', '')
         city = list(cities.keys())[i % len(cities)]
         district = cities[city][i % len(cities[city])]
         street_name = random.choice(streets)
         street_number = random.randint(1, 999)
-        email = fake.email()
+        email = fake.email().replace('@', str(random.randint(0, 1000000007)) + '@')
+        avatar = random.choice(urls)
         user_data = {
             'username': username,
             'password': password,
@@ -65,7 +88,8 @@ def generate_users(cities, streets, headers, num_customers=80, num_managers=20):
             'street_number': street_number,
             'city': city,
             'district': district,
-            'email': email
+            'email': email,
+            'avatar': avatar
         }
         users.append(user_data)
     
@@ -90,9 +114,10 @@ def generate_users(cities, streets, headers, num_customers=80, num_managers=20):
     if response.status_code == 200:
         data = response.json()
         for user in data:
-            if user['is_staff'] == True and user['is_superuser'] == False:
+            if user['username'] in manager_usernames:
                 manager_ids.append(user['id'])
     
+    print("Number of managers: ", len(manager_ids))
     return manager_ids
 
 def generate_price_configs(headers, num_configs=15):
@@ -187,11 +212,15 @@ def generate_homestays(cities, streets, manager_ids, config_ids, headers, num_ho
     # List of homestay descriptions
     with open('data_generation/utils_data/homestay_descriptions.txt', 'r') as f:
         descriptions = f.readlines()
+    
+    # fetch images and prices from json file
+    with open("data_generation/utils_data/homestay_img_price.json", "r") as output_file:
+        img_price_list = json.load(output_file)
 
     homestays = []
     for i in range(num_homestays):
         name = generate_homestay_name()
-        price = round(random.uniform(20.0, 300.0), 2)
+        price = img_price_list[i]['price']
         description = random.choice(descriptions)
         max_num_adults = random.randint(1, 10)
         max_num_children = random.randint(1, 10)
@@ -203,6 +232,7 @@ def generate_homestays(cities, streets, manager_ids, config_ids, headers, num_ho
         street_number = random.randint(1, 999)
         manager_id = random.choice(manager_ids)
         pricing_config_id = random.choice(config_ids)
+        image = img_price_list[i]['img'][0]
 
         homestay = {
             "name": name,
@@ -217,7 +247,8 @@ def generate_homestays(cities, streets, manager_ids, config_ids, headers, num_ho
             "city": city,
             "district": district,
             "manager_id": manager_id,
-            "pricing_config_id": pricing_config_id
+            "pricing_config_id": pricing_config_id,
+            "image": image
         }
 
         homestays.append(homestay)
@@ -386,8 +417,8 @@ def generate_homestay_services(homestay_ids, service_types, headers):
 # -----------------------------
 
 cities, streets = prepare()
-manager_ids = generate_users(cities, streets, login_admin(), 80, 20)
+manager_ids = generate_users(cities, streets, login_admin(), 1, 2)
 config_ids = generate_price_configs(login_admin(), 15)
-homestay_ids = generate_homestays(cities, streets, manager_ids, config_ids, login_admin(), 200)
+homestay_ids = generate_homestays(cities, streets, manager_ids, config_ids, login_admin(), 5)
 service_types = generate_service_types(login_admin())
 generate_homestay_services(homestay_ids, service_types, login_admin())

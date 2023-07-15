@@ -15,6 +15,11 @@ from pathlib import Path
 from datetime import timedelta
 from dotenv import load_dotenv
 
+import cloudinary
+import cloudinary.uploader
+import cloudinary.api
+
+
 load_dotenv()
 
 
@@ -25,7 +30,8 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = os.getenv('DJANGO_SECRET_KEY', 'django-insecure-tvmo(-q3s1sosis=fi+rqc4$31e2%3j_k2s2+g!712++!o36t9')
+SECRET_KEY = os.getenv(
+    'DJANGO_SECRET_KEY', 'django-insecure-tvmo(-q3s1sosis=fi+rqc4$31e2%3j_k2s2+g!712++!o36t9')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.getenv('DJANGO_DEBUG', 'True')
@@ -49,6 +55,7 @@ INSTALLED_APPS = [
     'users.apps.UsersConfig',
     'myadmin.apps.MyAdminConfig',
     'homestays.apps.HomestaysConfig',
+    'bookings.apps.BookingsConfig',
 ]
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
@@ -102,12 +109,17 @@ WSGI_APPLICATION = 'homestayrenting.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': os.getenv('POSTGRES_NAME', 'homestay'),
-        'USER': os.getenv('POSTGRES_USER', 'admin'),
-        'PASSWORD': os.getenv('POSTGRES_PASSWORD', 'admin'),
-        'HOST': os.getenv('DB_HOST', 'db'),
-        'PORT': os.getenv('DB_PORT', '5432'),
+        'ENGINE': 'django_psdb_engine
+        'NAME': os.environ.get('DB_NAME'),
+        'HOST': os.environ.get('DB_HOST'),
+        'PORT': os.environ.get('DB_PORT'),
+        'USER': os.environ.get('DB_USER'),
+        'PASSWORD': os.environ.get('DB_PASSWORD'),
+        'OPTIONS': {
+            'ssl': {'ca': os.environ.get('MYSQL_ATTR_SSL_CA')},
+            'charset': 'utf8mb4',
+            'init_command': 'SET default_storage_engine=INNODB',
+            }
     }
 }
 
@@ -152,3 +164,10 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 MEDIA_URL = '/media/'
+
+# Set up cloudinary config for uploading image
+cloudinary.config(
+    cloud_name="dp9km8tmk",
+    api_key="649821629756593",
+    api_secret="KoF4eTbX-cr9o7_Pc77_W3ro1MQ"
+)
