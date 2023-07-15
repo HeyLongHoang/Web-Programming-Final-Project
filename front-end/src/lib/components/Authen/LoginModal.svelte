@@ -1,8 +1,10 @@
-<script>
+<script lang="ts">
 import { createEventDispatcher } from 'svelte';
 import { authAPI, userAPI } from '$lib/api/api';
 import { tokens } from '$lib/api/headers';
 import { userDetailStore } from '$lib/stores/stores';
+import { NotFoundError, UnauthorizedError } from '$lib/api/exception';
+import type { TokenPair, UserDetail } from '$lib/types/types';
 
 const dispatch = createEventDispatcher();
 
@@ -10,27 +12,25 @@ let email = '';
 let password = '';
 
 async function handleSubmit() {
-    // You can add your login logic here
-    // ...
-    let tokenPair = await authAPI.userLogin(email, password);
-
-    console.log(tokenPair)
-    // After Login Approved
-    
-    if (tokenPair === null){
-        // TODO: Raise error or something
+    // Do Login
+    let tokenPair: TokenPair
+    try{
+        tokenPair = await authAPI.userLogin(email, password);
+    } catch(error){
+        if (error instanceof UnauthorizedError){
+            alert(error.message);
+        }
         return;
     }
+    console.log(tokenPair)
     // Add tokens to store
     tokens.set(tokenPair)
     localStorage.setItem('username', email);
-    let userDetail = await userAPI.getUserDetail(email);
-    
-    if (userDetail === null){
-        return;
-    }
-    userDetailStore.set(userDetail);
 
+    userDetailStore.update(value => {
+        value.username = email
+        return value
+    })
     // Dispatch the "close" event to close the modal
     dispatch('close');
 }
@@ -49,7 +49,7 @@ async function handleSubmit() {
         <form on:submit|preventDefault={handleSubmit}>
         <div class="mb-6">
             <label class="block text-lg font-bold mb-2 text-gray-700" for="email-input">
-            Email:
+            Username:
             </label>
             <input class="w-full text-lg py-2 px-3 rounded border border-gray-300 text-gray-700" 
             type="text" id="email-input" bind:value={email} required />
