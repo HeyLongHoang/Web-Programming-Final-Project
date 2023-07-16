@@ -4,8 +4,9 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticatedOrReadOnly
 from .models import Homestay, Service
-from .serializers import HomestaySerializer, ServiceSerializer
+from .serializers import HomestaySerializer, ServiceSerializer, ServiceGetSerializer, HomestayGetSerializer
 from django.db.models import Q
+from myadmin.models import ServiceType, PricingConfig
 
 
 @permission_classes([IsAuthenticatedOrReadOnly])
@@ -68,8 +69,8 @@ class HomestayDetail(APIView):
                 })
         reviews.sort(key=lambda x: x['review_timestamp'], reverse=True)
         avg_rating = None if len(reviews) == 0 else sum(int(review['rating']) for review in reviews) / len(reviews)
-
-        serializer = HomestaySerializer(homestay)
+        homestay.pricing_config = PricingConfig.objects.get(pk = homestay.pricing_config_id_id)
+        serializer = HomestayGetSerializer(homestay)
         data = serializer.data
         data['reviews'] = reviews
         data['avg_rating'] = avg_rating
@@ -104,7 +105,9 @@ class ListServices(APIView):
     def get(self, request, homestay_id):
         homestay = get_object_or_404(Homestay, id=homestay_id)
         services = homestay.service_set.all()
-        serializer = ServiceSerializer(services, many=True)
+        for service in services:
+            service.service_type = get_object_or_404(ServiceType, id=service.service_type_id_id)
+        serializer = ServiceGetSerializer(services, many=True)
         return Response(serializer.data)
     
     def post(self, request, homestay_id):

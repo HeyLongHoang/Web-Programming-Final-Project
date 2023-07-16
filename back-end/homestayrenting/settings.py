@@ -30,8 +30,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = os.getenv(
-    'DJANGO_SECRET_KEY', 'django-insecure-tvmo(-q3s1sosis=fi+rqc4$31e2%3j_k2s2+g!712++!o36t9')
+SECRET_KEY = os.getenv('DJANGO_SECRET_KEY', 'django-insecure-tvmo(-q3s1sosis=fi+rqc4$31e2%3j_k2s2+g!712++!o36t9')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.getenv('DJANGO_DEBUG', 'True')
@@ -65,7 +64,7 @@ REST_FRAMEWORK = {
 
 # Django project settings.py
 SIMPLE_JWT = {
-    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=5),
+    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=20),
     "REFRESH_TOKEN_LIFETIME": timedelta(days=1),
 }
 
@@ -109,12 +108,12 @@ WSGI_APPLICATION = 'homestayrenting.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django_psdb_engine
+        'ENGINE': 'django_psdb_engine',
         'NAME': os.environ.get('DB_NAME'),
-        'HOST': os.environ.get('DB_HOST'),
-        'PORT': os.environ.get('DB_PORT'),
         'USER': os.environ.get('DB_USER'),
         'PASSWORD': os.environ.get('DB_PASSWORD'),
+        'HOST': os.environ.get('DB_HOST'),
+        'PORT': os.environ.get('DB_PORT'),
         'OPTIONS': {
             'ssl': {'ca': os.environ.get('MYSQL_ATTR_SSL_CA')},
             'charset': 'utf8mb4',
