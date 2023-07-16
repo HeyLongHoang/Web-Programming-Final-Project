@@ -80,6 +80,11 @@ interface ReserveBookingInfo{
     num_children: number
 }
 
+interface BookingPeriod{
+    from: string,
+    to: string
+}
+
 interface TokenPair{
     token: string,
     refreshToken: string
@@ -98,6 +103,16 @@ export interface UserDetail{
     email?: string,
 }
 
+interface BookingInfo {
+    id: number,
+    checkin_date: string,
+    checkout_date: string,
+    status: string,
+    total_price: number,
+    comment?: string,
+    rating?: number
+}
+
 export {StarType, 
     type HomestayInfo, 
     type ManagerInfo,
@@ -108,4 +123,7 @@ export {StarType,
     type IServiceType,
     type IBookingService,
     type IPricingConfig,
-    type ReserveBookingInfo};
+    type ReserveBookingInfo,
+    type BookingPeriod,
+    type BookingInfo
+};
